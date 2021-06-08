@@ -1,0 +1,99 @@
+"
+" ~/.vimrc
+"
+
+" When started as "evim", evim.vim will already have done these settings.
+if v:progname =~? "evim"
+	finish
+endif
+
+"==============================================================================
+" Edit settings
+"==============================================================================
+syntax on
+set number			" display line number on the left
+set wrap			" visually wrap lines
+set linebreak			" line wrap at `breakat` instead of last character
+set background=dark		" use dark background
+set mouse=a			" always enables mouse
+set smartindent                 " smart autoindenting
+set fileencoding=utf-8		" utf-8 encoding
+set encoding=utf-8		" utf-8 encoding
+set wildmenu			" better command line completion
+set wildmode=longest,list	" better unix-like tab completion
+set clipboard=unnamedplus	" clipboard support
+"set termguicolors		" true colors
+set laststatus=1		" no status when only 1 window
+set backspace=indent,eol,start	" allow backspacing over autoindent, line breaks and start of insert action
+set nostartofline		" vertical goto preserves horizontal position
+set ignorecase			" use case insensitive search
+set smartcase			" except using capital letters
+set guicursor+=o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175
+
+"==============================================================================
+" Backup and undo
+"==============================================================================
+set backupdir=$HOME/.vim/backup
+set backup			" keep a backup file (restore to previous version)
+if has('persistent_undo')
+	set undofile		" keep an undo file (undo changes after closing)
+endif
+
+"==============================================================================
+" FileType
+"==============================================================================
+" FileType detection
+autocmd BufNewFile,BufRead *.S setlocal filetype=asm
+autocmd BufNewFile,BufRead *.lds setlocal filetype=ld
+autocmd BufNewFile,BufRead *.sig,*.cm setlocal filetype=sml
+autocmd BufNewFile,BufRead *.cls setlocal filetype=tex
+
+" Strip whitespace from end of lines when writing file
+autocmd FileType python,c,cpp,java,sml,tex,systemverilog,markdown,markdown,arm,asm,vim autocmd BufWritePre * :%s/\s\+$//e
+" Strip empty line from end of files when writing file
+autocmd FileType python,c,cpp,java,sml,tex,systemverilog,markdown,markdown,arm,asm,vim autocmd BufWritePre * :%s/\($\n\s*\)\+\%$//e
+
+" FileType specific format
+autocmd FileType python,c,cpp,java,sml,tex,systemverilog,markdown setlocal expandtab
+autocmd FileType python,c,cpp,java,sml,tex setlocal shiftwidth=4 softtabstop=4 tabstop=4
+autocmd FileType sml    setlocal shiftwidth=2 softtabstop=2 tabstop=2 textwidth=0
+autocmd FileType systemverilog    setlocal shiftwidth=2 softtabstop=2 tabstop=2
+autocmd FileType arm,asm    setlocal shiftwidth=8 softtabstop=8 tabstop=8 noexpandtab
+autocmd FileType c,cpp setlocal syntax+=.doxygen cindent cinoptions=g2,h2,N-s,E-s,i2s,+2s,(0,u0,U1,w1,W2s,ks
+
+" FileType specific comments (one end)
+autocmd FileType c,cpp,java,arm,asm	  map <buffer> ,c :s/^/\/\//<CR> <Esc>:nohlsearch <CR>
+autocmd FileType python,sh,make,conf map <buffer> ,c :s/^/#/<CR> <Esc>:nohlsearch <CR>
+autocmd FileType vim map <buffer> ,c :s/^/\"/<CR> <Esc>:nohlsearch <CR>
+autocmd FileType sql map <buffer> ,c :s/^/--/<CR> <Esc>:nohlsearch <CR>
+autocmd FileType tex map <buffer> ,c :s/^/%/<CR> <Esc>:nohlsearch <CR>
+autocmd FileType c,cpp,java,python,sh,make,conf,vim,sql,tex,arm,asm map <buffer> ,C :s/^\/\/\\|^--\\|^> \\|^[#"%!;]//<CR> <Esc>:nohlsearch<CR>
+
+" FileType specific format
+autocmd FileType c,cpp map <buffer> <F3> m1 :%!clang-format<CR> `1
+
+" FileType specific folding mathods
+autocmd FileType c,cpp,java,tex,vim,xml,html setlocal foldmethod=syntax
+autocmd FileType python setlocal foldmethod=indent
+autocmd Filetype c,cpp,java,tex,vim,xml,html,python normal zi
+
+" FileType specific settings
+autocmd FileType text,markdown setlocal spell
+
+"==============================================================================
+" Utilities
+"==============================================================================
+" last-position-jump
+autocmd BufReadPost *
+			\ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+			\ |   exe "normal! g`\""
+			\ | endif
+
+" Create directory when save
+autocmd BufWritePre *
+			\ if !isdirectory(expand("<afile>:h")) |
+			\ call mkdir(expand("<afile>:h"), "p") |
+			\ endif
+
+" Key mapping
+:inoremap <S-Tab> <C-V><Tab>
